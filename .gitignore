@@ -1,0 +1,7 @@
+# Ignore directories
+.tfl/
+.vscode/
+__pycache__/
+
+# Ignore corpus
+*.txt
