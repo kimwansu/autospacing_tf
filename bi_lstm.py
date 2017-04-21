@@ -63,7 +63,7 @@ def train(trainX, trainY, model_file):
     # Save model
     model.save(model_file)
 
-def interference(testX, testY, model_file):
+def test(testX, testY, model_file):
     # Data preprocessing
     testX = pad_sequences(testX, maxlen=440, value=0.)
     testY = to_categorical(testY, nb_classes=2)
@@ -79,7 +79,7 @@ def interference(testX, testY, model_file):
     pred = model.predict(testX)
     return pred
 
-def test_train():
+def run_train():
     pool = Pool(processes=cpu_count())
     X, Y = make_data(pool, 'ted_7_ErasePunc_FullKorean__train.txt')
     print('make train data end.')
@@ -88,14 +88,14 @@ def test_train():
 
     train(X, Y, 'model.tfl')
 
-def test_interference():
+def run_test():
     pool = Pool(processes=cpu_count())
     X, Y = make_data(pool, 'ted_7_ErasePunc_FullKorean__test.txt')
     print('make test data end.')
     X = norm_many(pool, X)
     print('norm test data end.')
 
-    pred = interference(X, Y, 'model.tfl')
+    pred = test(X, Y, 'model.tfl')
     print('pred[:10]={}'.format(pred[:10]))
 
 def usage():
@@ -108,8 +108,8 @@ if __name__ == '__main__':
 
     freeze_support()
     if sys.argv[1] == 'train':
-        test_train()
+        run_train()
     elif sys.argv[1] == 'interference':
-        test_interference()
+        run_test()
     else:
         usage()
