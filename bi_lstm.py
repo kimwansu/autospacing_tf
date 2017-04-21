@@ -4,7 +4,7 @@ import tflearn
 from tflearn.data_utils import to_categorical, pad_sequences
 from tflearn.layers.core import input_data, dropout, fully_connected
 from tflearn.layers.embedding_ops import embedding
-from tflearn.layers.recurrent import bidirectional_rnn, BasicLSTMCell, GRUCell
+from tflearn.layers.recurrent import bidirectional_rnn, BasicLSTMCell
 from tflearn.layers.recurrent import lstm
 from tflearn.layers.estimator import regression
 from tflearn.optimizers import *
@@ -74,14 +74,8 @@ def main():
     pool = Pool(processes=cpu_count())
     X, Y = make_data(pool, 'ted_7_ErasePunc_FullKorean__train.txt')
     print('make data end.')
-    #input()
-    #print('X={}'.format(X[:10]))
-    #print('type(X[0])={}'.format(type(X[0])))
     X = norm_many(pool, X)
     print('norm_data end.')
-    #print('Y={}'.format(Y[:10]))
-    #print('type(Y)={}'.format(type(Y)))
-    #print('type(Y[0])={}'.format(type(Y[0])))
     train(X, Y, 'model.tfl')
 
 if __name__ == '__main__':
