@@ -4,4 +4,8 @@
 __pycache__/
 
 # Ignore corpus
-*.txt
+*.txt*
+*.zip
+*.tfl.data*
+*.tfl.index
+*.tfl.meta

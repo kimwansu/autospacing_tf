@@ -5,7 +5,7 @@ import re
 
 def read_text_lines(fname, enc='utf-8'):
     with codecs.open(fname, 'r', encoding=enc) as rfh:
-        return rfh.readlines()
+        return list(filter(None, [l.strip() for l in rfh.readlines()]))
 
 '''
 말뭉치를 정제한다.

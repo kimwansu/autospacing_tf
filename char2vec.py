@@ -59,4 +59,4 @@ def test(train_file, wv_dim):
     print('모델 저장 성공')
 
 if __name__ == '__main__':
-    test('ted_7_ErasePunc_FullKorean.txt', 40)
+    test('ted_7_ErasePunc_FullKorean.txt', 20)
