@@ -178,7 +178,7 @@ def run_train_divided(train_file):
     epoch = 4
     for i in range(epoch):
         for X, Y in make_data_divided(pool, train_file):
-            print('epoch: {}'.format(epoch))
+            print('epoch: {}'.format(i))
             trainer.train(X, Y)
 
     trainer.save('model_MDM001.tfl')
