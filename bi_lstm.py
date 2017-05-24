@@ -4,6 +4,8 @@ import codecs
 import sys
 import re
 
+import h5py
+
 import numpy as np
 
 import tflearn
@@ -58,20 +60,47 @@ def train(trainX, trainY, model_file):
     2: Loss, Accuracy, Gradients, Weights
     3: Loss, Accuracy, Gradients, Weights, Activations, Sparsity (Best Visualization)
     '''
-    #model = tflearn.DNN(net, clip_gradients=0., tensorboard_verbose=0)
     model = tflearn.DNN(net, clip_gradients=0., tensorboard_verbose=0,
-                        checkpoint_path='./chkpoint/',
-                        best_checkpoint_path='./best_chkpoint/',
+                        checkpoint_path='./chkpoint_mdm001/',
+                        best_checkpoint_path='./best_chkpoint_mdm001/',
                         best_val_accuracy=0.9)
     print('tfl.DNN end.')
 
     model.fit(trainX, trainY, validation_set=0.1, show_metric=True, batch_size=128,
-              n_epoch=4, run_id='bilstm_170512')
+              n_epoch=4, run_id='bilstm_170519b')
     print('model.fit end.')
 
     # Save model
     model.save(model_file)
     print('model save end.')
+
+
+class Trainer():
+    def __init__(self):
+        print('train_diviced')
+        print('# Network building')
+        self.net = bi_LSTM()
+        self.model = tflearn.DNN(self.net, clip_gradients=0., tensorboard_verbose=0,
+                                 checkpoint_path='./chkpoint_b/',
+                                 best_checkpoint_path='./best_chkpoint_b/',
+                                 best_val_accuracy=0.9)
+        print('tfl.DNN end.')
+        self.i = 0
+
+    def train(self, trainX, trainY):
+        print('# Data preprocessing')
+        trainX = pad_sequences(trainX, maxlen=440, value=0.)
+        trainY = to_categorical(trainY, nb_classes=2)
+        print('data preproc end.')
+
+        self.model.fit(trainX, trainY, validation_set=0.1, show_metric=True, batch_size=128,
+                       n_epoch=1, run_id='bilstm_170524mdm001')
+        print('model.fit #{} end'.format(self.i))
+        self.i += 1
+
+    def save(self, model_file):
+        self.model.save(model_file)
+        print('model save end.')
 
 
 def interference(testX, testY, model_file):
@@ -132,14 +161,27 @@ class Tagger():
         return result
 
 
-def run_train():
+def run_train(train_file):
     print('train')
     pool = Pool(processes=cpu_count())
-    X, Y = make_data(pool, 'ted_7_ErasePunc_FullKorean__train.txt')
+    X, Y = make_data(pool, train_file)
     print('make train data end.')
     X = norm_many(pool, X)
     print('norm_data end.')
-    train(X, Y, 'model.tfl')
+    train(X, Y, 'model_MDM001.tfl')
+
+
+def run_train_divided(train_file):
+    print('train')
+    pool = Pool(processes=cpu_count())
+    trainer = Trainer()
+    epoch = 4
+    for i in range(epoch):
+        for X, Y in make_data_divided(pool, train_file):
+            print('epoch: {}'.format(epoch))
+            trainer.train(X, Y)
+
+    trainer.save('model_MDM001.tfl')
 
 
 def run_test():
@@ -166,11 +208,13 @@ def run_test_divided(test_file):
 
 def main():
     if len(sys.argv) < 2:
-        print('usage: bi_lstm.py (train|test)')
+        print('usage: bi_lstm.py (train|test|make)')
         sys.exit(1)
 
     if sys.argv[1] == 'train':
-        run_train()
+        train_file = 'MDM001_FullKorean__train.txt'
+        #run_train(train_file)
+        run_train_divided(train_file)
     elif sys.argv[1] == 'test':
         test_file = 'ted_7_ErasePunc_FullKorean__test.txt'
         lines = read_text_lines(test_file)
@@ -207,8 +251,44 @@ def main():
                         break
 
                 wfh.write('\n'.join(buf) + '\n')
+    elif sys.argv[1] == 'make':
+        make_file = 'MDM001_FullKorean__train.txt'
+        lines = read_text_lines(make_file)
+        lines = (refine_line(line) for line in lines)
+        lines = [re.sub(r'[\ \n\r]+', '', line).strip() for line in lines]
+
+        i = 0
+        pool = Pool(processes=cpu_count())
+        X = []
+        Y = []
+        for x, y in make_data_divided(pool, make_file):
+            x = norm_many(pool, x)
+            x = pad_sequences(x, maxlen=440, value=0.)
+            if len(X) > 0:
+                X = np.concatenate((X, x), axis=0)
+            else:
+                X = x
+
+            print('{}) x'.format(i), end=', ')
+            y = to_categorical(y, nb_classes=2)
+            if len(Y) > 0:
+                Y = np.concatenate((Y, y), axis=0)
+            else:
+                Y = y
+
+            print('y')
+            i += 1
+
+        # TODO: 파일 이름, 데이터셋 이름 바꾸기
+        #h5f = h5py.File('ted_train.h5', 'w')
+        #h5f.create_dataset('ted7_X', data=X)
+        #h5f.create_dataset('ted7_Y', data=Y)
+        h5f = h5py.File('ted_MDM001.h5', 'w')
+        h5f.create_dataset('MDM001_X', data=X)
+        h5f.create_dataset('MDM001_Y', data=Y)
+        h5f.close()
     else:
-        print('usage: bi_lstm.py (train|test)')
+        print('usage: bi_lstm.py (train|test|make)')
 
 
 if __name__ == '__main__':

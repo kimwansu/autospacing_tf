@@ -100,7 +100,8 @@ char2vec_model = load_model(r'./char2vec_Etri_d30.txt')
 ngram2vec_models = []
 for n in range(1, 4):
     #ngram2vec_models.append(load_model(r'./char2vec_Etri_d30_{}gram.txt'.format(n)))
-    ngram2vec_models.append(load_model(r'./char2vec_ted_d40_{}gram.txt'.format(n)))
+    #ngram2vec_models.append(load_model(r'./char2vec_ted_d40_{}gram.txt'.format(n)))
+    ngram2vec_models.append(load_model(r'./char2vec_MDM001_d40_{}gram.txt'.format(n)))
 
 
 def char2vec(ch):
@@ -282,9 +283,9 @@ def generate_feature4(args):
 
 def make_data(pool, fname):
     lines = read_text_lines(fname)
-    lines = [refine_line(line) for line in lines]
-    corpus = [raw2corpus(line) for line in lines]
-    sent = [corpus2sent(line) for line in corpus]
+    lines = (refine_line(line) for line in lines)
+    corpus = (raw2corpus(line) for line in lines)
+    sent = (corpus2sent(line) for line in corpus)
 
     X = []
     Y = []
@@ -310,7 +311,7 @@ def make_data_divided(pool, fname):
         x = pool.map(generate_feature4, [(line, i) for i in range(len(line))])
         X += norm_many(pool, x)
         Y += ((1 if y == 'B' else 0) for _, y in line)
-        if line_cnt == 10000:
+        if line_cnt == 100000:
             yield X, Y
             line_cnt = 0
             X = []

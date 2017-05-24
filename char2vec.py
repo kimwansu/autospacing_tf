@@ -23,7 +23,7 @@ def make_ngram2vec_corpus(lines, n):
         return [[line[i:i+n] for i in range(len(line)-(n-1))] for line in lines]
 
 def make_ngram2vec_model(lines, wv_dim):
-    r = re.compile(r' ')
+    r = re.compile(r'\s+')
     # ngram을 학습시키도록 빈 칸을 없앤다.
     lines = [r.sub('', refine_line(line)) for line in lines]
     models = []
@@ -59,4 +59,5 @@ def test(train_file, wv_dim):
     print('모델 저장 성공')
 
 if __name__ == '__main__':
-    test('ted_7_ErasePunc_FullKorean.txt', 20)
+    #test('ted_7_ErasePunc_FullKorean.txt', 20)
+    test('MDM001_FullKorean.txt', 40)

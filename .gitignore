@@ -9,3 +9,5 @@ __pycache__/
 *.tfl.data*
 *.tfl.index
 *.tfl.meta
+chkpoint*
+checkpoint*
