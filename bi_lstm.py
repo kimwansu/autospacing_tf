@@ -81,8 +81,8 @@ class Trainer():
         print('# Network building')
         self.net = bi_LSTM()
         self.model = tflearn.DNN(self.net, clip_gradients=0., tensorboard_verbose=0,
-                                 checkpoint_path='./chkpoint_b/',
-                                 best_checkpoint_path='./best_chkpoint_b/',
+                                 checkpoint_path='./chkpoint_mdm001/',
+                                 best_checkpoint_path='./best_chkpoint_mdm001/',
                                  best_val_accuracy=0.9)
         print('tfl.DNN end.')
         self.i = 0
